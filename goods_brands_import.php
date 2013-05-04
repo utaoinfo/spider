@@ -31,11 +31,11 @@ function searchItem($keyword, $cid){
 	$req->setGuarantee("true");
 	$req->setStartCommissionRate("500");
 	$req->setEndCommissionRate("5000");
-	$req->setStartCommissionNum("10");
+	$req->setStartCommissionNum("5");
 	$req->setEndCommissionNum("5000");
-	$req->setStartPrice("20");
+	$req->setStartPrice("10");
 	$req->setEndPrice("5000");
-	$req->setStartTotalnum("100");
+	$req->setStartTotalnum("50");
 	$req->setEndTotalnum("50000");
 	$req->setMallItem("true");
 	$req->setPageNo(1);
@@ -65,10 +65,10 @@ foreach($taobao_items->taobaoke_items->taobaoke_item as $item){
 	$goods_no = $item->num_iid;
 	$img = $item->pic_url;
 	$url = $item->click_url;
-	$names = array("官方旗舰店", "童鞋旗舰店", "旗舰店");
+	$names = array("官方旗舰店", "童鞋旗舰店","母婴旗舰店", "旗舰店");
 	$sellernick = str_replace($names, "", $item->nick);
 	$price = $item->price;
-	if($price * $volume < 20000) {
+	if($price * $volume < 10000) {
 		continue;
 	}
 	$create_time = gmdate("Y/m/d H:i:s");
@@ -90,17 +90,18 @@ foreach($taobao_items->taobaoke_items->taobaoke_item as $item){
 	}
 
 	$shop_url= $item->shop_click_url;
+	$credit_score = $item->seller_credit_score;
 	$sql="select * from xph_brand where  name='$sellernick'";
 	$result = mysql_query($sql, $conn);
 	$rows =mysql_affected_rows($conn);
 	if ( $rows == 0){
-		$sql = "insert into xph_brand(name,url) values('$sellernick','$shop_url')"; 
+		$sql = "insert into xph_brand(name,url, credit_score) values('$sellernick','$shop_url', $credit_score)"; 
 		$result = mysql_query($sql, $conn);
 		if(!$result){
 			var_dump($sql ." Error: " . mysql_error());
 		}
 	}else{
-		$sql = "update xph_brand set url='$shop_url' where name='$sellernick'";
+		$sql = "update xph_brand set url='$shop_url', credit_score=$credit_score where name='$sellernick'";
 		$result = mysql_query($sql, $conn);
 		if(!$result){
 			var_dump($sql ." Error: " . mysql_error());

@@ -20,7 +20,7 @@ $sql = "select category_id, count(1) from xph_category_extend group by category_
 var_dump($sql);
 $result_all = mysql_query($sql, $conn);
 while($row=mysql_fetch_array($result_all)) {
-	if($row[1] <= 4){
+	if($row[1] <= 2){
 		continue;
 	}
 	$item = getItemCatInfo($row[0], 0);
@@ -35,7 +35,7 @@ while($row=mysql_fetch_array($result_all)) {
 	if ($is_parent == "true"){
 		$parent_cid= -2;
 	}
-	$sql = "insert into xph_category(id,parent_id,name) values($cid, $parent_cid, '$name') on duplicate key update parent_id=$parent_cid, name='$name'";
+	$sql = "insert ignore into xph_category(id,parent_id,name) values($cid, $parent_cid, '$name')";
 	$result = mysql_query($sql, $conn);
 	if(!$result){
 		echo "Error: " . mysql_error();
@@ -59,7 +59,7 @@ while($row=mysql_fetch_array($result_all)) {
 	if ($is_parent == "true"){
 		$parent_cid= -2;
 	}
-	$sql = "insert into xph_category(id,parent_id,name) values($cid, $parent_cid, '$name') on duplicate key update parent_id=$parent_cid, name='$name'";
+	$sql = "insert ignore into xph_category(id,parent_id,name) values($cid, $parent_cid, '$name')";
 	$result = mysql_query($sql, $conn);
 	if(!$result){
 		echo "Error: " . mysql_error();

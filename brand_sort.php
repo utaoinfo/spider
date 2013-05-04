@@ -11,8 +11,13 @@ while($row=mysql_fetch_array($result_all)) {
 	$sql = "update xph_brand set sort=$row[1] where id = $row[0]";
 	$result = mysql_query($sql, $conn);
 	if(!$result){
-		echo "Error: " . mysql_error();
+		echo  $sql . " Error: " . mysql_error();
 	}
 }
 
+$sql="delete from xph_brand where name like '%专营店' ";
+$result = mysql_query($sql, $conn);
+if(!$result){
+	echo  $sql . " Error: " . mysql_error();
+}
 mysql_close($conn);
