@@ -8,10 +8,25 @@ function searchItem($keyword, $cid){
 	$c->secretKey = 'bd309059d260a65a1439b587ae0edb78';
 
 	$req = new TaobaokeItemsGetRequest;
-	$req->setFields("num_iid,title,nick,pic_url,price,click_url,commission,commission_rate,commission_num,commission_volume,shop_click_url,seller_credit_score,item_location,volume");
+	$req->setFields("num_iid,title,nick,pic_url,price,click_url,commission,commission_num,commission_volume,shop_click_url,seller_credit_score,item_location,volume");
 	$req->setPid(41861233);
 	$req->setNick($keyword);
 	$req->setKeyword($keyword);
+	/**
+	 * 默认排序:default
+	 price_desc(价格从高到低)
+	 price_asc(价格从低到高)
+	 credit_desc(信用等级从高到低)
+	 commissionRate_desc(佣金比率从高到低)
+	 commissionRate_asc(佣金比率从低到高)
+	 commissionNum_desc(成交量成高到低)
+	 commissionNum_asc(成交量从低到高)
+	 commissionVolume_desc(总支出佣金从高到低)
+	 commissionVolume_asc(总支出佣金从低到高)
+	 delistTime_desc(商品下架时间从高到低)
+	 delistTime_asc(商品下架时间从低到高)
+	 **/
+
 	$req->setSort("commissionVolume_desc");
 	$req->setGuarantee("true");
 	$req->setStartCommissionRate("500");
@@ -19,12 +34,12 @@ function searchItem($keyword, $cid){
 	$req->setStartCommissionNum("10");
 	$req->setEndCommissionNum("5000");
 	$req->setStartPrice("20");
-	$req->setEndPrice("1000");
+	$req->setEndPrice("5000");
 	$req->setStartTotalnum("100");
 	$req->setEndTotalnum("50000");
 	$req->setMallItem("true");
 	$req->setPageNo(1);
-	$req->setPageSize(20);
+	$req->setPageSize(40);
 	$req->setOuterCode("abc");
 	$resp = $c->execute($req);
 	return $resp;
@@ -46,25 +61,28 @@ foreach($taobao_items->taobaoke_items->taobaoke_item as $item){
 	if ($commission < 1){
 		continue;
 	}
-	$price = $item->price;
 	$name=htmlspecialchars(strip_tags($item->title),ENT_QUOTES);
 	$goods_no = $item->num_iid;
 	$img = $item->pic_url;
 	$url = $item->click_url;
-	$sellernick = $item->nick;
+	$names = array("官方旗舰店", "童鞋旗舰店", "旗舰店");
+	$sellernick = str_replace($names, "", $item->nick);
 	$price = $item->price;
+	if($price * $volume < 20000) {
+		continue;
+	}
 	$create_time = gmdate("Y/m/d H:i:s");
 	$sql="select * from xph_goods where goods_no = '$goods_no'";
 	$result = mysql_query($sql, $conn);
 	$rows =mysql_affected_rows($conn);
 	if ( $rows == 0){
-		$sql = "insert into xph_goods(goods_no,name,img,url,commission,volume,sellernick,sell_price, create_time) values('$goods_no','$name','$img','$url', $commission,$volume,'$sellernick',$price,'$create_time')"; 
+		$sql = "insert into xph_goods(goods_no,name,img,url,commission,volume,sellernick,market_price, create_time) values('$goods_no','$name','$img','$url', $commission,$volume,'$sellernick',$price,'$create_time')"; 
 		$result = mysql_query($sql, $conn);
 		if(!$result){
 			var_dump($sql ." Error: " . mysql_error());
 		}
 	} else {
-		$sql = "update xph_goods set commission=$commission,volume=$volume,url='$url',sell_price=$price,create_time='$create_time' where goods_no='$goods_no'";
+		$sql = "update xph_goods set commission=$commission,volume=$volume,url='$url',market_price=$price,create_time='$create_time' where goods_no='$goods_no'";
 		$result = mysql_query($sql, $conn);
 		if(!$result){
 			var_dump($sql ." Error: " . mysql_error());
@@ -72,12 +90,11 @@ foreach($taobao_items->taobaoke_items->taobaoke_item as $item){
 	}
 
 	$shop_url= $item->shop_click_url;
-	$cid = $item->cid;
 	$sql="select * from xph_brand where  name='$sellernick'";
 	$result = mysql_query($sql, $conn);
 	$rows =mysql_affected_rows($conn);
 	if ( $rows == 0){
-		$sql = "insert into xph_brand(name,url,category_ids) values('$sellernick','$shop_url',$cid)"; 
+		$sql = "insert into xph_brand(name,url) values('$sellernick','$shop_url')"; 
 		$result = mysql_query($sql, $conn);
 		if(!$result){
 			var_dump($sql ." Error: " . mysql_error());

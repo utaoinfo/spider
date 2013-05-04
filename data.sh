@@ -3,7 +3,7 @@
 # 抓取并分析数据. 包括商品id, 现价, 原价, 月销售量, 评论书, 以及商家等.
 #
 
-export http_proxy="113.108.11.28:80"
+export http_proxy="61.145.116.252:80"
 test $# -eq 0 && urls="www.tmall.com" ||  urls="$*"
 dt=$(date +%Y%m%d)
 curl_flag=" -L -A Mozilla/5.0 -f -s  -m 10 -H Accept-Encoding:gzip,deflate "
@@ -31,12 +31,12 @@ for url in $urls ;do
 		pic=$(grep taobaocdn $product_id | perl -pe 's/.*=.([^"]+).*$/\1/g' | grep taobaocdn | head -1 )
 		shop=$( grep 'productShop-name' $product_id | perl -pe 's/<[^>]+>//g' )
 		if [[ $flag1 -eq 1 ]];then
-		 echo "set names utf8; INSERT INTO spider(product_id,new_price,old_price,volume,comment,pic,shop,title) \
+		 echo "set names utf8; INSERT INTO xph_spider(product_id,new_price,old_price,volume,comment,pic,shop,title) \
 			VALUES ('$product_id',$new_price,$old_price,$volume,$comment,'$pic','$shop','$title') \
 			ON DUPLICATE KEY UPDATE new_price=$new_price, volume=$volume, comment=$comment, dt=now();" | mysql -hlocalhost -uroot -putaoinfo@2013  xiaopihai
 		fi
 		if [[ $flag2 -eq 1 ]];then
-		 echo "set names utf8; INSERT INTO spider(product_id,new_price,old_price,total_volume,comment,pic,shop,title) \
+		 echo "set names utf8; INSERT INTO xph_spider(product_id,new_price,old_price,total_volume,comment,pic,shop,title) \
 			VALUES ('$product_id',$new_price,$old_price,$volume,$comment,'$pic','$shop','$title') \
 			ON DUPLICATE KEY UPDATE new_price=$new_price, total_volume=$volume, comment=$comment, dt=now();" | mysql -hlocalhost -uroot -putaoinfo@2013  xiaopihai
 		fi

@@ -16,10 +16,13 @@ $conn = mysql_connect('localhost','root','utaoinfo@2013');
 mysql_query("SET NAMES UTF8");
 mysql_select_db('xiaopihai', $conn);
 
-$sql = "select distinct parent_id from xph_category where parent_id>1";
+$sql = "select category_id, count(1) from xph_category_extend group by category_id";
 var_dump($sql);
 $result_all = mysql_query($sql, $conn);
 while($row=mysql_fetch_array($result_all)) {
+	if($row[1] <= 4){
+		continue;
+	}
 	$item = getItemCatInfo($row[0], 0);
 	$item_cat=$item->item_cats->item_cat;
 	if(!$item_cat) {
@@ -30,7 +33,7 @@ while($row=mysql_fetch_array($result_all)) {
 	$parent_cid=$item_cat->parent_cid;
 	$is_parent=$item_cat->is_parent;
 	if ($is_parent == "true"){
-		$parent_cid= -1;
+		$parent_cid= -2;
 	}
 	$sql = "insert into xph_category(id,parent_id,name) values($cid, $parent_cid, '$name') on duplicate key update parent_id=$parent_cid, name='$name'";
 	$result = mysql_query($sql, $conn);
@@ -39,8 +42,8 @@ while($row=mysql_fetch_array($result_all)) {
 	}
 }
 
-exit(0);
-$sql = "select distinct category_id from xph_category_extend";
+
+$sql = "select distinct parent_id from xph_category where parent_id>10";
 var_dump($sql);
 $result_all = mysql_query($sql, $conn);
 while($row=mysql_fetch_array($result_all)) {
@@ -54,7 +57,7 @@ while($row=mysql_fetch_array($result_all)) {
 	$parent_cid=$item_cat->parent_cid;
 	$is_parent=$item_cat->is_parent;
 	if ($is_parent == "true"){
-		$parent_cid= -1;
+		$parent_cid= -2;
 	}
 	$sql = "insert into xph_category(id,parent_id,name) values($cid, $parent_cid, '$name') on duplicate key update parent_id=$parent_cid, name='$name'";
 	$result = mysql_query($sql, $conn);

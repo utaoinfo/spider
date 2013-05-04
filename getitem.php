@@ -17,7 +17,7 @@ function getItemInfo($item_id){
 $conn = mysql_connect('localhost','root','utaoinfo@2013');
 mysql_query("SET NAMES UTF8");
 mysql_select_db('xiaopihai', $conn);
-$sql = "select goods_no from xph_goods";
+$sql = "select goods_no,id from xph_goods";
 $result_all = mysql_query($sql, $conn);
 while($row=mysql_fetch_array($result_all)) {
 	var_dump($row[0]);
@@ -26,20 +26,28 @@ while($row=mysql_fetch_array($result_all)) {
 	$pattern = '/\d+:\d+:/i';
 	$replacement = '';
 	$content=preg_replace($pattern, $replacement, $content);
-	$sql = "update xph_goods set content='$content'";
+	$sql = "update xph_goods set content='$content' where goods_no = '$row[0]'";
 	mysql_query($sql, $conn);
 
-	$goods_no=$item->item->num_iid;
+	$goods_id=$row[1];
 	$category_id=$item->item->cid;
-	$sql="select * from xph_category_extend where goods_no = '$goods_no'";
+	$sql="select * from xph_category_extend where goods_id = '$goods_id'";
 	$result = mysql_query($sql, $conn);
 	$rows =mysql_affected_rows($conn);
 	if ( $rows == 0){
-		$sql = "insert into xph_category_extend(goods_no,category_id) values('$goods_no', $category_id)";
+		$sql = "insert into xph_category_extend(goods_id,category_id) values('$goods_id', $category_id)";
 		$result = mysql_query($sql, $conn);
+		if(!$result){
+			var_dump($sql ." Error: " . mysql_error());
+		}
+
 	} else {
-		$sql = "update xph_category_enxtend set category_id=$category_id where goods_no = '$goods_no'";
+		$sql = "update xph_category_extend set category_id=$category_id where goods_id = '$goods_id'";
 		$result = mysql_query($sql, $conn);
+		if(!$result){
+			var_dump($sql ." Error: " . mysql_error());
+		}
+
 	}
 }
 
